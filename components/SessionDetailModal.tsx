@@ -31,11 +31,11 @@ export function SessionDetailModal({ isOpen, onClose, dayId, date, logs }: Props
   }, {})
 
   const dayNames: Record<string, string> = {
-    d1: 'Torso Guiado',
-    d2: 'Pierna Guiada',
-    d3: 'Push (Empuje)',
-    d4: 'Pull (Tracción)',
-    d5: 'Core & Pierna',
+    d1: 'Lunes: Piernas / Glúteos',
+    d2: 'Martes: Tirón (Espalda / Bíceps)',
+    d3: 'Miércoles: Piernas (Todo Máquina)',
+    d4: 'Jueves: Empuje (Pecho / Hombro / Tríceps)',
+    d5: 'Viernes: Full Body',
   }
 
   return (

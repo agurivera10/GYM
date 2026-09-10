@@ -26,7 +26,7 @@ export default function DashboardPage() {
   const [totalVolume, setTotalVolume] = useState(0)
 
   // Chart
-  const [selectedExerciseId, setSelectedExerciseId] = useState('d1-ex1')
+  const [selectedExerciseId, setSelectedExerciseId] = useState('prensa')
   const [progressData, setProgressData] = useState<{ date: string; weight: number }[]>([])
 
   // Calendar
@@ -91,7 +91,9 @@ export default function DashboardPage() {
     router.push('/login')
   }
 
-  const allExercises = workoutDays.flatMap(d => d.exercises)
+  const allExercises = Array.from(
+    new Set(workoutDays.flatMap(d => [...d.exercises, ...(d.alternatives || [])]))
+  )
 
   return (
     <div className="min-h-screen pb-10">

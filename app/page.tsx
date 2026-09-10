@@ -20,6 +20,7 @@ export default function Home() {
   const [userId, setUserId] = useState<string | null>(null)
   const [historyData, setHistoryData] = useState<Record<string, ExerciseHistoryData>>({})
   const [glossaryOpen, setGlossaryOpen] = useState(false)
+  const [showAlternatives, setShowAlternatives] = useState(false)
 
   const currentDayData = workoutDays.find(d => d.id === activeDay)!
 
@@ -31,11 +32,16 @@ export default function Home() {
     })
   }, [])
 
-  // Cargar historial previo y récords (PR) de los ejercicios del día activo
+  // Cargar historial previo y récords (PR) de los ejercicios y alternativos del día activo
   useEffect(() => {
     if (!userId || !currentDayData) return
 
-    fetchExerciseHistory(userId, currentDayData.exercises)
+    const allExercisesToFetch = [
+      ...currentDayData.exercises,
+      ...(currentDayData.alternatives || [])
+    ]
+
+    fetchExerciseHistory(userId, allExercisesToFetch)
       .then(res => {
         setHistoryData(res)
       })
@@ -146,6 +152,56 @@ export default function Home() {
               />
             )
           })}
+          {/* Sección de Ejercicios Alternativos */}
+          {currentDayData.alternatives && currentDayData.alternatives.length > 0 && (
+            <div className="mt-6 mb-4">
+              <button
+                type="button"
+                onClick={() => setShowAlternatives(prev => !prev)}
+                className="w-full bg-bg-card border border-border-main hover:border-accent/50 rounded-2xl p-4 flex items-center justify-between transition-colors shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl bg-[#2C2C2E] w-8 h-8 flex items-center justify-center rounded-lg">🔄</span>
+                  <div className="text-left">
+                    <p className="text-sm font-bold text-text-main">
+                      Ejercicios Alternativos ({currentDayData.alternatives.length})
+                    </p>
+                    <p className="text-[11px] text-text-muted">
+                      Por si alguna máquina está ocupada en el gimnasio
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-accent bg-accent/10 px-2.5 py-1 rounded-full border border-accent/20">
+                  {showAlternatives ? 'Ocultar ▲' : 'Ver opciones ▼'}
+                </span>
+              </button>
+
+              {showAlternatives && (
+                <div className="mt-4 flex flex-col gap-1">
+                  <div className="bg-bg-elevated/60 border border-border-main/50 rounded-xl p-3 mb-3 text-xs text-text-muted">
+                    💡 <strong className="text-text-main">Consejo:</strong> Podés hacer cualquiera de estos si la máquina principal está en uso. ¡Tus series y récords también se guardarán automáticamente!
+                  </div>
+                  {currentDayData.alternatives.map((altId, altIdx) => {
+                    const details = getExerciseDetails(altId)
+                    const displayDetails = { ...details, title: `Alt ${altIdx + 1}. ${details.title}` }
+
+                    return (
+                      <ExerciseCard
+                        key={`${activeDay}-alt-${altId}`}
+                        exerciseId={altId}
+                        details={displayDetails}
+                        onOpenInfo={(id) => setInfoExercise(getExerciseDetails(id))}
+                        userId={userId ?? undefined}
+                        dayId={activeDay}
+                        history={historyData[altId]}
+                        onOpenGlossary={() => setGlossaryOpen(true)}
+                      />
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
           <button 
             className="block w-full bg-text-main text-bg-dark border-none p-4 rounded-xl text-base font-bold mt-8 mb-5 cursor-pointer flex items-center justify-center gap-2 shadow-lg"
