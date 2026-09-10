@@ -14,7 +14,25 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { finishWorkoutSession, fetchExerciseHistory } from '@/lib/actions'
 
+function getTodayInfo() {
+  const day = new Date().getDay() // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+  const names = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+  const map: Record<number, string> = {
+    1: 'd1', // Lunes -> Pierna/Glúteo
+    2: 'd2', // Martes -> Tirón
+    3: 'd3', // Miércoles -> Piernas Máquina
+    4: 'd4', // Jueves -> Empuje
+    5: 'd5', // Viernes -> Full Body
+  }
+  return {
+    dayId: map[day] || 'd1',
+    isWeekend: day === 0 || day === 6,
+    dayName: names[day]
+  }
+}
+
 export default function Home() {
+  const [todayInfo, setTodayInfo] = useState({ dayId: 'd1', isWeekend: false, dayName: 'Lunes' })
   const [activeDay, setActiveDay] = useState(workoutDays[0].id)
   const [infoExercise, setInfoExercise] = useState<any | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
@@ -23,6 +41,13 @@ export default function Home() {
   const [showAlternatives, setShowAlternatives] = useState(false)
 
   const currentDayData = workoutDays.find(d => d.id === activeDay)!
+
+  // Detección automática del día actual al cargar
+  useEffect(() => {
+    const info = getTodayInfo()
+    setTodayInfo(info)
+    setActiveDay(info.dayId)
+  }, [])
 
   // Obtener usuario autenticado
   useEffect(() => {
@@ -103,6 +128,7 @@ export default function Home() {
         <DayTab 
           days={workoutDays.map(d => ({ id: d.id, label: d.label }))}
           activeDay={activeDay}
+          todayDayId={todayInfo.dayId}
           onSelectDay={setActiveDay}
         />
       </header>
@@ -117,9 +143,23 @@ export default function Home() {
           className="p-5"
         >
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-bold text-accent">{currentDayData.title}</h2>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-xl font-bold text-accent">{currentDayData.title}</h2>
+                {activeDay === todayInfo.dayId && !todayInfo.isWeekend && (
+                  <span className="bg-accent/15 text-accent text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border border-accent/30">
+                    📅 Rutina de Hoy ({todayInfo.dayName})
+                  </span>
+                )}
+              </div>
+              {todayInfo.isWeekend && activeDay === 'd1' && (
+                <p className="text-[11px] text-text-muted mt-1">
+                  🏖️ Fin de semana (descanso). Te dejamos preparado el Lunes.
+                </p>
+              )}
+            </div>
             {userId && (
-              <div className="flex items-center gap-1.5 bg-accent/10 border border-accent/30 px-2 py-1 rounded-full">
+              <div className="flex items-center gap-1.5 bg-accent/10 border border-accent/30 px-2 py-1 rounded-full shrink-0">
                 <div className="w-2 h-2 rounded-full bg-accent" />
                 <span className="text-[10px] text-accent font-bold uppercase">Conectado</span>
               </div>
