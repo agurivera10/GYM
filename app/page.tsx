@@ -19,9 +19,9 @@ function getTodayInfo() {
   const names = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
   const map: Record<number, string> = {
     1: 'd1', // Lunes -> Pierna/Glúteo
-    2: 'd2', // Martes -> Tirón
+    2: 'd2', // Martes -> Empuje
     3: 'd3', // Miércoles -> Piernas Máquina
-    4: 'd4', // Jueves -> Empuje
+    4: 'd4', // Jueves -> Tirón
     5: 'd5', // Viernes -> Full Body
   }
   return {

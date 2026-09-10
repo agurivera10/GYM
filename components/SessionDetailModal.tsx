@@ -60,9 +60,9 @@ export function SessionDetailModal({
 
   const dayNames: Record<string, string> = {
     d1: 'Lunes: Piernas / Glúteos',
-    d2: 'Martes: Tirón (Espalda / Bíceps)',
+    d2: 'Martes: Empuje (Pecho / Hombro / Tríceps)',
     d3: 'Miércoles: Piernas (Todo Máquina)',
-    d4: 'Jueves: Empuje (Pecho / Hombro / Tríceps)',
+    d4: 'Jueves: Tirón (Espalda / Bíceps)',
     d5: 'Viernes: Full Body',
   }
 

@@ -580,10 +580,10 @@ export const workoutDays: WorkoutDay[] = [
   },
   {
     id: 'd2',
-    label: 'D2: Tirón',
-    title: 'Martes: Tirón (Espalda / Bíceps)',
-    exercises: ['jalon-pecho', 'remo-maq-sentado', 'remo-alto-polea', 'curl-biceps-polea', 'face-pull'],
-    alternatives: ['remo-polea-baja', 'jalon-tras-nuca', 'curl-martillo-polea']
+    label: 'D2: Empuje',
+    title: 'Martes: Empuje (Pecho / Hombro / Tríceps)',
+    exercises: ['press-banca', 'press-inclinado-maq', 'pec-deck', 'press-hombro-maq', 'extension-triceps-polea'],
+    alternatives: ['press-banca-inclinado', 'elevaciones-laterales-polea', 'fondos-maq-asistida']
   },
   {
     id: 'd3',
@@ -594,10 +594,10 @@ export const workoutDays: WorkoutDay[] = [
   },
   {
     id: 'd4',
-    label: 'D4: Empuje',
-    title: 'Jueves: Empuje (Pecho / Hombro / Tríceps)',
-    exercises: ['press-banca', 'press-inclinado-maq', 'pec-deck', 'press-hombro-maq', 'extension-triceps-polea'],
-    alternatives: ['press-banca-inclinado', 'elevaciones-laterales-polea', 'fondos-maq-asistida']
+    label: 'D4: Tirón',
+    title: 'Jueves: Tirón (Espalda / Bíceps)',
+    exercises: ['jalon-pecho', 'remo-maq-sentado', 'remo-alto-polea', 'curl-biceps-polea', 'face-pull'],
+    alternatives: ['remo-polea-baja', 'jalon-tras-nuca', 'curl-martillo-polea']
   },
   {
     id: 'd5',
