@@ -3,21 +3,27 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { DayTab } from '@/components/DayTab'
-import { ExerciseCard } from '@/components/ExerciseCard'
+import { ExerciseCard, ExerciseHistoryData } from '@/components/ExerciseCard'
 import { BottomSheet } from '@/components/BottomSheet'
 import { StickyTimer } from '@/components/StickyTimer'
+import { FitnessGlossaryModal } from '@/components/FitnessGlossaryModal'
 import { workoutDays, getExerciseDetails } from '@/lib/data'
-import { Check, BarChart2, LogIn } from 'lucide-react'
+import { Check, BarChart2, LogIn, HelpCircle } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
-import { finishWorkoutSession } from '@/lib/actions'
+import { finishWorkoutSession, fetchExerciseHistory } from '@/lib/actions'
 
 export default function Home() {
   const [activeDay, setActiveDay] = useState(workoutDays[0].id)
   const [infoExercise, setInfoExercise] = useState<any | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [historyData, setHistoryData] = useState<Record<string, ExerciseHistoryData>>({})
+  const [glossaryOpen, setGlossaryOpen] = useState(false)
 
+  const currentDayData = workoutDays.find(d => d.id === activeDay)!
+
+  // Obtener usuario autenticado
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data }) => {
@@ -25,12 +31,26 @@ export default function Home() {
     })
   }, [])
 
-  const currentDayData = workoutDays.find(d => d.id === activeDay)!
+  // Cargar historial previo y récords (PR) de los ejercicios del día activo
+  useEffect(() => {
+    if (!userId || !currentDayData) return
+
+    fetchExerciseHistory(userId, currentDayData.exercises)
+      .then(res => {
+        setHistoryData(res)
+      })
+      .catch(err => {
+        console.error('Error al cargar historial:', err)
+      })
+  }, [userId, activeDay])
 
   const handleFinish = async () => {
     if (window.confirm('¿Querés marcar esta sesión como completada?')) {
       if (userId) {
         await finishWorkoutSession(userId, activeDay)
+        // Refrescar historial
+        const res = await fetchExerciseHistory(userId, currentDayData.exercises)
+        setHistoryData(res)
       }
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
@@ -47,12 +67,29 @@ export default function Home() {
             <h1 className="text-2xl font-extrabold">Recomposición Guiada</h1>
           </div>
           <div className="flex gap-2 mt-1">
+            {/* Botón de Guía para Principiantes */}
+            <button
+              onClick={() => setGlossaryOpen(true)}
+              className="bg-bg-elevated p-2.5 rounded-full text-text-muted border border-border-main hover:text-accent"
+              title="Glosario y Guía para principiantes"
+            >
+              <HelpCircle className="w-5 h-5" />
+            </button>
+
             {!userId && (
-              <Link href="/login" className="bg-bg-elevated p-2.5 rounded-full text-text-muted border border-border-main">
+              <Link
+                href="/login"
+                className="bg-bg-elevated p-2.5 rounded-full text-text-muted border border-border-main"
+                title="Iniciar sesión"
+              >
                 <LogIn className="w-5 h-5" />
               </Link>
             )}
-            <Link href="/dashboard" className="bg-bg-elevated p-2.5 rounded-full text-accent border border-border-main">
+            <Link
+              href="/dashboard"
+              className="bg-bg-elevated p-2.5 rounded-full text-accent border border-border-main"
+              title="Ver estadísticas y calendario"
+            >
               <BarChart2 className="w-5 h-5" />
             </Link>
           </div>
@@ -78,7 +115,7 @@ export default function Home() {
             {userId && (
               <div className="flex items-center gap-1.5 bg-accent/10 border border-accent/30 px-2 py-1 rounded-full">
                 <div className="w-2 h-2 rounded-full bg-accent" />
-                <span className="text-[10px] text-accent font-bold uppercase">Guardando</span>
+                <span className="text-[10px] text-accent font-bold uppercase">Conectado</span>
               </div>
             )}
           </div>
@@ -104,12 +141,14 @@ export default function Home() {
                 onOpenInfo={(id) => setInfoExercise(getExerciseDetails(id))}
                 userId={userId ?? undefined}
                 dayId={activeDay}
+                history={historyData[exId]}
+                onOpenGlossary={() => setGlossaryOpen(true)}
               />
             )
           })}
 
           <button 
-            className="block w-full bg-text-main text-bg-dark border-none p-4 rounded-xl text-base font-bold mt-8 mb-5 cursor-pointer flex items-center justify-center gap-2"
+            className="block w-full bg-text-main text-bg-dark border-none p-4 rounded-xl text-base font-bold mt-8 mb-5 cursor-pointer flex items-center justify-center gap-2 shadow-lg"
             onClick={handleFinish}
           >
             <Check className="w-5 h-5" />
@@ -122,6 +161,11 @@ export default function Home() {
         isOpen={!!infoExercise}
         onClose={() => setInfoExercise(null)}
         exercise={infoExercise}
+      />
+
+      <FitnessGlossaryModal
+        isOpen={glossaryOpen}
+        onClose={() => setGlossaryOpen(false)}
       />
 
       <StickyTimer />

@@ -74,3 +74,64 @@ export async function finishWorkoutSession(userId: string, dayId: string) {
   revalidatePath('/')
   return { success: true }
 }
+
+export interface ExerciseHistoryData {
+  lastSessionSets: { setNumber: number; weight: number; reps: number }[]
+  personalRecord: { maxWeight: number; reps: number } | null
+}
+
+export async function fetchExerciseHistory(userId: string, exerciseIds: string[]): Promise<Record<string, ExerciseHistoryData>> {
+  const supabase = await createClient()
+
+  const { data: logs, error } = await supabase
+    .from('exercise_logs')
+    .select('exercise_id, set_number, weight, reps, created_at, session_id')
+    .eq('user_id', userId)
+    .in('exercise_id', exerciseIds)
+    .order('created_at', { ascending: false })
+
+  if (error || !logs) {
+    return {}
+  }
+
+  const result: Record<string, ExerciseHistoryData> = {}
+
+  for (const exId of exerciseIds) {
+    const exLogs = logs.filter(l => l.exercise_id === exId)
+    if (exLogs.length === 0) {
+      result[exId] = { lastSessionSets: [], personalRecord: null }
+      continue
+    }
+
+    // 1. Personal Record (mayor peso levantado)
+    let prWeight = 0
+    let prReps = 0
+    for (const log of exLogs) {
+      const w = log.weight || 0
+      const r = log.reps || 0
+      if (w > prWeight || (w === prWeight && r > prReps)) {
+        prWeight = w
+        prReps = r
+      }
+    }
+
+    // 2. Última sesión registrada (el session_id más reciente)
+    const latestSessionId = exLogs[0].session_id
+    const latestSessionLogs = exLogs
+      .filter(l => l.session_id === latestSessionId)
+      .sort((a, b) => a.set_number - b.set_number)
+      .map(l => ({
+        setNumber: l.set_number,
+        weight: l.weight || 0,
+        reps: l.reps || 0
+      }))
+
+    result[exId] = {
+      lastSessionSets: latestSessionLogs,
+      personalRecord: prWeight > 0 ? { maxWeight: prWeight, reps: prReps } : null
+    }
+  }
+
+  return result
+}
+
