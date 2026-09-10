@@ -6,11 +6,19 @@ import Link from 'next/link'
 import { ArrowLeft, CalendarDays, BarChart2, Plus, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { DashboardStats } from '@/components/DashboardStats'
+import { MuscleGroupBreakdown } from '@/components/MuscleGroupBreakdown'
 import { ProgressChart } from '@/components/ProgressChart'
 import { HistoryCalendar } from '@/components/HistoryCalendar'
 import { SessionDetailModal } from '@/components/SessionDetailModal'
 import { LogSessionModal } from '@/components/LogSessionModal'
-import { fetchDashboardStats, fetchTrainedDates, fetchSessionDetail, fetchExerciseProgress } from './actions'
+import {
+  fetchDashboardStats,
+  fetchTrainedDates,
+  fetchSessionDetail,
+  fetchExerciseProgress,
+  fetchMuscleGroupStats,
+  MuscleGroupStat
+} from './actions'
 import { workoutDays, exerciseDB } from '@/lib/data'
 
 type Tab = 'stats' | 'calendar'
@@ -24,6 +32,7 @@ export default function DashboardPage() {
   // Stats
   const [totalSessions, setTotalSessions] = useState(0)
   const [totalVolume, setTotalVolume] = useState(0)
+  const [muscleStats, setMuscleStats] = useState<MuscleGroupStat[]>([])
 
   // Chart
   const [selectedExerciseId, setSelectedExerciseId] = useState('prensa')
@@ -52,15 +61,17 @@ export default function DashboardPage() {
 
   const loadData = async (uid: string) => {
     setLoading(true)
-    const [stats, dates, progress] = await Promise.all([
+    const [stats, dates, progress, muscles] = await Promise.all([
       fetchDashboardStats(uid),
       fetchTrainedDates(uid),
       fetchExerciseProgress(uid, selectedExerciseId),
+      fetchMuscleGroupStats(uid),
     ])
     setTotalSessions(stats.totalSessions ?? 0)
     setTotalVolume(stats.totalVolume ?? 0)
     setTrainedDays(dates)
     setProgressData(progress)
+    setMuscleStats(muscles)
     setLoading(false)
   }
 
@@ -82,7 +93,7 @@ export default function DashboardPage() {
 
   const handleLogModalClose = () => {
     setLogModalOpen(false)
-    if (userId) loadData(userId) // Refresh data after logging
+    if (userId) loadData(userId)
   }
 
   const handleSignOut = async () => {
@@ -100,11 +111,16 @@ export default function DashboardPage() {
       {/* Header */}
       <header className="bg-[#141415]/85 backdrop-blur-md pt-6 pb-4 px-5 border-b border-border-main sticky top-0 z-40">
         <div className="flex items-center justify-between mb-4">
-          <Link href="/" className="text-text-muted">
-            <ArrowLeft className="w-6 h-6" />
+          <Link href="/" className="text-text-muted hover:text-text-main flex items-center gap-1 text-sm font-semibold">
+            <ArrowLeft className="w-5 h-5" />
+            <span>Volver</span>
           </Link>
           <h1 className="text-lg font-extrabold text-text-main">Mi Progreso</h1>
-          <button onClick={handleSignOut} className="text-text-muted">
+          <button
+            onClick={handleSignOut}
+            className="text-text-muted hover:text-red transition-colors p-1"
+            title="Cerrar sesión"
+          >
             <LogOut className="w-5 h-5" />
           </button>
         </div>
@@ -141,27 +157,32 @@ export default function DashboardPage() {
           <>
             {tab === 'stats' && (
               <>
+                {/* Métricas Generales */}
                 <DashboardStats totalSessions={totalSessions} totalVolume={totalVolume} />
 
-                <div className="mb-4">
-                  <p className="text-xs text-text-muted uppercase font-bold mb-2">Ver progreso de ejercicio</p>
+                {/* Desglose Visual por Grupo Muscular */}
+                <MuscleGroupBreakdown stats={muscleStats} />
+
+                {/* Selector de Ejercicio y Gráfico de Progreso */}
+                <div className="bg-bg-card border border-border-main rounded-2xl p-4 mb-4 shadow-sm">
+                  <p className="text-xs text-text-muted uppercase font-bold mb-2">Progreso por Ejercicio</p>
                   <select
                     value={selectedExerciseId}
                     onChange={e => setSelectedExerciseId(e.target.value)}
-                    className="w-full bg-bg-elevated border border-border-main text-text-main rounded-xl p-3 text-base focus:outline-none focus:border-accent"
+                    className="w-full bg-bg-elevated border border-border-main text-text-main rounded-xl p-3 text-sm font-bold focus:outline-none focus:border-accent mb-4"
                   >
                     {allExercises.map(exId => (
                       <option key={exId} value={exId}>
-                        {exerciseDB[exId]?.icon} {exerciseDB[exId]?.title}
+                        {exerciseDB[exId]?.icon} {exerciseDB[exId]?.title || exId}
                       </option>
                     ))}
                   </select>
-                </div>
 
-                <ProgressChart
-                  data={progressData}
-                  exerciseName={exerciseDB[selectedExerciseId]?.title ?? selectedExerciseId}
-                />
+                  <ProgressChart
+                    data={progressData}
+                    exerciseName={exerciseDB[selectedExerciseId]?.title ?? selectedExerciseId}
+                  />
+                </div>
               </>
             )}
 
@@ -170,7 +191,8 @@ export default function DashboardPage() {
                 {/* FAB - log past session */}
                 <button
                   onClick={() => { setLogPreselectedDate(undefined); setLogModalOpen(true) }}
-                  className="fixed bottom-6 right-5 z-50 bg-accent text-black w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-accent/30"
+                  className="fixed bottom-6 right-5 z-50 bg-accent text-black w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-accent/30 hover:scale-105 active:scale-95 transition-all"
+                  title="Cargar sesión pasada"
                 >
                   <Plus className="w-7 h-7" />
                 </button>
@@ -186,7 +208,7 @@ export default function DashboardPage() {
                     <p className="text-text-muted text-sm">No hay sesiones registradas aún.</p>
                     <button
                       onClick={() => setLogModalOpen(true)}
-                      className="text-accent font-bold text-sm mt-2"
+                      className="text-accent font-bold text-sm mt-2 hover:underline"
                     >
                       + Registrar primera sesión
                     </button>
@@ -205,6 +227,10 @@ export default function DashboardPage() {
         dayId={selectedSession?.dayId ?? null}
         date={selectedSession?.date ?? null}
         logs={selectedSession?.logs ?? []}
+        userId={userId}
+        onSessionUpdated={() => {
+          if (userId) loadData(userId)
+        }}
       />
 
       {userId && (

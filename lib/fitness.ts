@@ -10,6 +10,64 @@ export function calculate1RM(weight: number, reps: number): number {
   return Math.round(weight * (1 + reps / 30))
 }
 
+export interface MuscleGroupCategory {
+  id: string
+  name: string
+  icon: string
+  color: string
+  exercises: string[]
+}
+
+export const MUSCLE_GROUPS: MuscleGroupCategory[] = [
+  {
+    id: 'legs',
+    name: 'Piernas y Glúteos',
+    icon: '🦵',
+    color: '#32D74B',
+    exercises: [
+      'prensa', 'hip-thrust-maq', 'curl-femoral-acostado', 'abductores-maq', 'gemelos-prensa',
+      'hack-squat', 'extension-cuadriceps', 'curl-femoral-sentado', 'aductores-maq', 'gemelos-sentado',
+      'patada-gluteo-polea', 'prensa-horizontal', 'gluteo-maquina', 'gemelos-pie-maq'
+    ]
+  },
+  {
+    id: 'back',
+    name: 'Espalda y Tirón',
+    icon: '🔙',
+    color: '#0A84FF',
+    exercises: [
+      'jalon-pecho', 'remo-maq-sentado', 'remo-alto-polea', 'remo-polea-baja', 'jalon-tras-nuca'
+    ]
+  },
+  {
+    id: 'chest',
+    name: 'Pecho (Pectorales)',
+    icon: '🧱',
+    color: '#FF9F0A',
+    exercises: [
+      'press-banca', 'press-inclinado-maq', 'pec-deck', 'press-banca-inclinado'
+    ]
+  },
+  {
+    id: 'shoulders',
+    name: 'Hombros',
+    icon: '🦅',
+    color: '#BF5AF2',
+    exercises: [
+      'press-hombro-maq', 'face-pull', 'elevaciones-laterales-polea'
+    ]
+  },
+  {
+    id: 'arms',
+    name: 'Brazos (Bíceps / Tríceps)',
+    icon: '🦾',
+    color: '#FF453A',
+    exercises: [
+      'curl-biceps-polea', 'extension-triceps-polea', 'curl-martillo-polea', 'fondos-maq-asistida'
+    ]
+  }
+]
+
 // Glosario de términos para principiantes
 export const GLOSARIO_FITNESS = {
   PR: {
