@@ -13,9 +13,10 @@ interface TrainedDay {
 interface Props {
   trainedDays: TrainedDay[]
   onSelectDay: (sessionId: string, dayId: string, date: string) => void
+  onSelectEmptyDay?: (date: Date) => void
 }
 
-export function HistoryCalendar({ trainedDays, onSelectDay }: Props) {
+export function HistoryCalendar({ trainedDays, onSelectDay, onSelectEmptyDay }: Props) {
   const trainedDates = trainedDays.map(d => new Date(d.date + 'T12:00:00'))
 
   const dayIdColors: Record<string, string> = {
@@ -31,6 +32,8 @@ export function HistoryCalendar({ trainedDays, onSelectDay }: Props) {
     const match = trainedDays.find(d => d.date === dateStr)
     if (match) {
       onSelectDay(match.sessionId, match.dayId, match.date)
+    } else if (day <= new Date() && onSelectEmptyDay) {
+      onSelectEmptyDay(day)
     }
   }
 
