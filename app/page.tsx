@@ -6,8 +6,8 @@ import { ExerciseCard } from '@/components/ExerciseCard'
 import { BottomSheet } from '@/components/BottomSheet'
 import { StickyTimer } from '@/components/StickyTimer'
 import { workoutDays, getExerciseDetails } from '@/lib/data'
-import { Check } from 'lucide-react'
-
+import { Check, BarChart2 } from 'lucide-react'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Home() {
@@ -19,10 +19,17 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <header className="bg-[#141415]/85 backdrop-blur-md pt-6 pb-4 px-5 border-b border-border-main sticky top-0 z-40">
-        <div className="bg-gradient-to-br from-accent to-[#28A745] text-black text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase inline-block mb-2">
-          Pro Tracking V7
+        <div className="flex justify-between items-start mb-3">
+          <div>
+            <div className="bg-gradient-to-br from-accent to-[#28A745] text-black text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase inline-block mb-2">
+              Pro Tracking V7
+            </div>
+            <h1 className="text-2xl font-extrabold">Recomposición Guiada</h1>
+          </div>
+          <Link href="/dashboard" className="bg-bg-elevated p-2.5 rounded-full text-accent border border-border-main">
+            <BarChart2 className="w-5 h-5" />
+          </Link>
         </div>
-        <h1 className="text-2xl font-extrabold mb-3">Recomposición Guiada</h1>
         <DayTab 
           days={workoutDays.map(d => ({ id: d.id, label: d.label }))}
           activeDay={activeDay}
