@@ -1,7 +1,8 @@
 export interface ExerciseInfo {
   icon: string
   title: string
-  ytId: string
+  guideUrl: string
+  ytId?: string
   tech: string[]
   error: string
   focus: string
@@ -16,7 +17,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'prensa': {
     icon: '🦵',
     title: 'Prensa (Leg Press)',
-    ytId: 'IZxyjW7OSvc',
+    guideUrl: 'https://musclewiki.com/exercise/machine-leg-press',
     target: 'Cuádriceps y Glúteos',
     reps: '10-12',
     ref: '80-100 kg',
@@ -33,7 +34,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'hip-thrust-maq': {
     icon: '🍑',
     title: 'Hip Thrust en Máquina',
-    ytId: 'SEdqd1n0cvg',
+    guideUrl: 'https://musclewiki.com/exercise/machine-plate-loaded-hip-thrust',
     target: 'Glúteos',
     reps: '10-12',
     ref: '30-45 kg',
@@ -51,7 +52,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'curl-femoral-acostado': {
     icon: '🪝',
     title: 'Curl Femoral Acostado',
-    ytId: 'F488k67BTNo',
+    guideUrl: 'https://musclewiki.com/exercise/machine-hamstring-curl',
     target: 'Isquiotibiales (Atrás del muslo)',
     reps: '10-12',
     ref: '20-30 kg',
@@ -68,7 +69,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'abductores-maq': {
     icon: '🛸',
     title: 'Abductores en Máquina',
-    ytId: 'FnbJCpG78tQ',
+    guideUrl: 'https://musclewiki.com/exercise/machine-hip-abduction',
     target: 'Glúteo Medio (Lateral)',
     reps: '12-15',
     ref: '25-35 kg',
@@ -86,7 +87,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'gemelos-prensa': {
     icon: '🏔️',
     title: 'Gemelos en Prensa',
-    ytId: 'Kteh7u1-s8k',
+    guideUrl: 'https://musclewiki.com/exercise/machine-horizontal-leg-press-calf-raise',
     target: 'Pantorrillas',
     reps: '15',
     ref: '70-90 kg',
@@ -106,7 +107,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'jalon-pecho': {
     icon: '🦍',
     title: 'Jalón al Pecho (Polea)',
-    ytId: 'EUIri47Epcg',
+    guideUrl: 'https://musclewiki.com/exercise/cable-lat-pulldown',
     target: 'Dorsales (Espalda)',
     reps: '10-12',
     ref: '30-40 kg',
@@ -124,7 +125,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'remo-maq-sentado': {
     icon: '🛶',
     title: 'Remo en Máquina Sentado',
-    ytId: 'H75im9fAUMc',
+    guideUrl: 'https://musclewiki.com/exercise/machine-seated-cable-row',
     target: 'Espalda Media',
     reps: '10-12',
     ref: '25-35 kg',
@@ -142,7 +143,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'remo-alto-polea': {
     icon: '🚣‍♂️',
     title: 'Remo Alto en Polea',
-    ytId: 'GZbfZ033f74',
+    guideUrl: 'https://www.liftosaur.com/exercises/cable-high-row',
     target: 'Espalda Alta y Deltoides Posterior',
     reps: '10-12',
     ref: '25-30 kg',
@@ -160,7 +161,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'curl-biceps-polea': {
     icon: '🦾',
     title: 'Curl de Bíceps en Polea',
-    ytId: 'kwG2ipFRgfo',
+    guideUrl: 'https://musclewiki.com/exercise/cable-bar-curl',
     target: 'Bíceps',
     reps: '10-12',
     ref: '15-20 kg',
@@ -178,7 +179,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'face-pull': {
     icon: '🎭',
     title: 'Face Pull en Polea',
-    ytId: 'rep-qVOkqgk',
+    guideUrl: 'https://musclewiki.com/exercise/cable-face-pull',
     target: 'Hombro Posterior y Postura',
     reps: '12-15',
     ref: '15-20 kg',
@@ -198,7 +199,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'hack-squat': {
     icon: '🏋️',
     title: 'Hack Squat',
-    ytId: '0tn5K9NlCfo',
+    guideUrl: 'https://musclewiki.com/exercise/machine-hack-squat',
     target: 'Cuádriceps y Glúteos',
     reps: '10-12',
     ref: '40-60 kg',
@@ -216,7 +217,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'extension-cuadriceps': {
     icon: '🦿',
     title: 'Extensión de Cuádriceps',
-    ytId: 'YyvSfVjQeL0',
+    guideUrl: 'https://musclewiki.com/exercise/machine-leg-extension',
     target: 'Cuádriceps (Frente del muslo)',
     reps: '12-15',
     ref: '25-35 kg',
@@ -234,7 +235,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'curl-femoral-sentado': {
     icon: '🪝',
     title: 'Curl Femoral Sentado',
-    ytId: 'ELOCsoDSmrg',
+    guideUrl: 'https://musclewiki.com/exercise/seated-leg-curl',
     target: 'Isquiotibiales (Atrás del muslo)',
     reps: '10-12',
     ref: '25-35 kg',
@@ -252,7 +253,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'aductores-maq': {
     icon: '🗜️',
     title: 'Aductores en Máquina',
-    ytId: 'b2C2_P9L1cE',
+    guideUrl: 'https://musclewiki.com/exercise/machine-hip-adduction',
     target: 'Aductores (Interior del muslo)',
     reps: '12-15',
     ref: '25-35 kg',
@@ -270,7 +271,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'gemelos-sentado': {
     icon: '🏔️',
     title: 'Gemelos Sentado',
-    ytId: 'JbyjNymZOt0',
+    guideUrl: 'https://musclewiki.com/exercise/machine-seated-calf-raises',
     target: 'Pantorrillas (Sóleo)',
     reps: '15',
     ref: '20-30 kg',
@@ -290,7 +291,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'press-banca': {
     icon: '🧱',
     title: 'Press de Banca',
-    ytId: 'rT7DgCr-3pg',
+    guideUrl: 'https://musclewiki.com/exercise/barbell-bench-press',
     target: 'Pecho (Pectoral)',
     reps: '8-10',
     ref: '40-60 kg',
@@ -308,7 +309,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'press-inclinado-maq': {
     icon: '📐',
     title: 'Press Inclinado en Máquina',
-    ytId: 'SrqOu55lrYU',
+    guideUrl: 'https://musclewiki.com/exercise/machine-plate-loaded-incline-chest-press',
     target: 'Pecho Superior',
     reps: '10-12',
     ref: '25-35 kg',
@@ -326,7 +327,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'pec-deck': {
     icon: '🦋',
     title: 'Pec Deck (Aperturas)',
-    ytId: 'eGjt4jcWA9c',
+    guideUrl: 'https://musclewiki.com/exercise/machine-pec-fly',
     target: 'Pecho',
     reps: '10-12',
     ref: '20-30 kg',
@@ -344,7 +345,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'press-hombro-maq': {
     icon: '🏋️‍♂️',
     title: 'Press de Hombro en Máquina',
-    ytId: 'WvjOMR-8E5Y',
+    guideUrl: 'https://musclewiki.com/exercise/machine-overhand-overhead-press',
     target: 'Hombros',
     reps: '10-12',
     ref: '15-25 kg',
@@ -362,7 +363,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'extension-triceps-polea': {
     icon: '🪢',
     title: 'Extensión de Tríceps en Polea',
-    ytId: '2-LAMcpzODU',
+    guideUrl: 'https://musclewiki.com/exercise/cable-rope-pushdown',
     target: 'Tríceps',
     reps: '10-12',
     ref: '15-20 kg',
@@ -382,7 +383,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'patada-gluteo-polea': {
     icon: '🍑',
     title: 'Patada de Glúteo en Polea',
-    ytId: 'Z3Q0w3JtGzQ',
+    guideUrl: 'https://musclewiki.com/exercise/cable-standing-glute-kickback',
     target: 'Glúteo Mayor',
     reps: '12-15',
     ref: '10-15 kg',
@@ -400,7 +401,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'remo-polea-baja': {
     icon: '🚣',
     title: 'Remo Polea Baja (Agarre Neutro)',
-    ytId: 'GZbfZ033f74',
+    guideUrl: 'https://fitnessvolt.com/seated-cable-row/',
     target: 'Espalda Media y Dorsal',
     reps: '10-12',
     ref: '30-40 kg',
@@ -418,7 +419,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'jalon-tras-nuca': {
     icon: '🪁',
     title: 'Jalón Tras Nuca en Polea',
-    ytId: 'EUIri47Epcg',
+    guideUrl: 'https://www.puregym.com/exercises/back/lat-exercises/lat-pulldown/',
     target: 'Espalda Alta',
     reps: '10-12',
     ref: '25-35 kg',
@@ -436,7 +437,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'curl-martillo-polea': {
     icon: '🔨',
     title: 'Curl Martillo en Polea (Cuerda)',
-    ytId: 'TwD-YGVP4Bk',
+    guideUrl: 'https://musclewiki.com/exercise/cable-rope-hammer-curl',
     target: 'Braquial y Antebrazo',
     reps: '10-12',
     ref: '15-20 kg',
@@ -454,7 +455,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'prensa-horizontal': {
     icon: '🦵',
     title: 'Prensa Horizontal',
-    ytId: 'IZxyjW7OSvc',
+    guideUrl: 'https://musclewiki.com/exercise/machine-leg-press',
     target: 'Piernas / Cuádriceps',
     reps: '10-12',
     ref: '60-80 kg',
@@ -472,7 +473,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'gluteo-maquina': {
     icon: '🍑',
     title: 'Glúteo en Máquina (Kickback)',
-    ytId: 'Z3Q0w3JtGzQ',
+    guideUrl: 'https://musclewiki.com/exercise/cable-standing-glute-kickback',
     target: 'Glúteos',
     reps: '12-15',
     ref: '20-30 kg',
@@ -490,7 +491,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'gemelos-pie-maq': {
     icon: '🏔️',
     title: 'Gemelos de Pie en Máquina',
-    ytId: 'Kteh7u1-s8k',
+    guideUrl: 'https://musclewiki.com/exercise/machine-standing-calf-raises',
     target: 'Gemelos (Pantorrillas)',
     reps: '12-15',
     ref: '40-60 kg',
@@ -508,7 +509,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'press-banca-inclinado': {
     icon: '📐',
     title: 'Press de Banca Inclinado (Barra)',
-    ytId: 'SrqOu55lrYU',
+    guideUrl: 'https://musclewiki.com/exercise/barbell-incline-bench-press',
     target: 'Pecho Superior',
     reps: '8-10',
     ref: '30-45 kg',
@@ -526,7 +527,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'elevaciones-laterales-polea': {
     icon: '🦅',
     title: 'Elevaciones Laterales en Polea',
-    ytId: 'WJm9ZA2PjaG',
+    guideUrl: 'https://musclewiki.com/exercise/cable-low-bilateral-lateral-raise',
     target: 'Hombro Lateral',
     reps: '12-15',
     ref: '2.5-5 kg',
@@ -544,7 +545,7 @@ export const exerciseDB: Record<string, ExerciseInfo> = {
   'fondos-maq-asistida': {
     icon: '🛹',
     title: 'Fondos en Máquina Asistida',
-    ytId: 'ZCG6hAOrQj8',
+    guideUrl: 'https://musclewiki.com/exercise/machine-assisted-parallel-bar-dips',
     target: 'Pecho y Tríceps',
     reps: '8-10',
     ref: 'Asistencia 30-40 kg',
@@ -611,7 +612,7 @@ export const getExerciseDetails = (id: string): ExerciseInfo => {
   return exerciseDB[id] || {
     icon: '💪',
     title: id,
-    ytId: '',
+    guideUrl: 'https://musclewiki.com',
     tech: ['Controlá la respiración.', 'Mantené el torso firme.'],
     error: 'Hacer movimientos bruscos sin control.',
     focus: 'Músculo objetivo.',
