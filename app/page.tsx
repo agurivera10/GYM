@@ -7,8 +7,11 @@ import { ExerciseCard, ExerciseHistoryData } from '@/components/ExerciseCard'
 import { BottomSheet } from '@/components/BottomSheet'
 import { StickyTimer } from '@/components/StickyTimer'
 import { FitnessGlossaryModal } from '@/components/FitnessGlossaryModal'
-import { workoutDays, getExerciseDetails } from '@/lib/data'
-import { Check, BarChart2, LogIn, HelpCircle } from 'lucide-react'
+import { EditRoutineModal } from '@/components/EditRoutineModal'
+import { ExercisePickerModal } from '@/components/ExercisePickerModal'
+import { WorkoutDay, getExerciseDetails } from '@/lib/data'
+import { getCustomWorkoutDays, getAllExercisesMap } from '@/lib/routineStore'
+import { Check, BarChart2, LogIn, HelpCircle, Settings2, Plus, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
@@ -33,14 +36,30 @@ function getTodayInfo() {
 
 export default function Home() {
   const [todayInfo, setTodayInfo] = useState({ dayId: 'd1', isWeekend: false, dayName: 'Lunes' })
-  const [activeDay, setActiveDay] = useState(workoutDays[0].id)
+  const [routineDays, setRoutineDays] = useState<WorkoutDay[]>([])
+  const [activeDay, setActiveDay] = useState('d1')
   const [infoExercise, setInfoExercise] = useState<any | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [historyData, setHistoryData] = useState<Record<string, ExerciseHistoryData>>({})
   const [glossaryOpen, setGlossaryOpen] = useState(false)
+  const [editRoutineOpen, setEditRoutineOpen] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const [showAlternatives, setShowAlternatives] = useState(false)
 
-  const currentDayData = workoutDays.find(d => d.id === activeDay)!
+  // Extra exercises added on-the-fly to the current workout session
+  const [extraExercisesByDay, setExtraExercisesByDay] = useState<Record<string, string[]>>({})
+
+  // Cargar días de rutina personalizados
+  useEffect(() => {
+    const loadDays = () => {
+      const days = getCustomWorkoutDays()
+      setRoutineDays(days)
+    }
+    loadDays()
+
+    window.addEventListener('custom-routine-updated', loadDays)
+    return () => window.removeEventListener('custom-routine-updated', loadDays)
+  }, [])
 
   // Detección automática del día actual al cargar
   useEffect(() => {
@@ -57,13 +76,18 @@ export default function Home() {
     })
   }, [])
 
-  // Cargar historial previo y récords (PR) de los ejercicios y alternativos del día activo
+  const currentDayData = routineDays.find(d => d.id === activeDay) || routineDays[0]
+  const allExercises = getAllExercisesMap()
+  const todayExtras = extraExercisesByDay[activeDay] || []
+
+  // Cargar historial previo y récords (PR) de los ejercicios, alternativos y extras del día activo
   useEffect(() => {
     if (!userId || !currentDayData) return
 
     const allExercisesToFetch = [
       ...currentDayData.exercises,
-      ...(currentDayData.alternatives || [])
+      ...(currentDayData.alternatives || []),
+      ...todayExtras
     ]
 
     fetchExerciseHistory(userId, allExercisesToFetch)
@@ -73,19 +97,51 @@ export default function Home() {
       .catch(err => {
         console.error('Error al cargar historial:', err)
       })
-  }, [userId, activeDay])
+  }, [userId, activeDay, currentDayData, todayExtras])
 
   const handleFinish = async () => {
     if (window.confirm('¿Querés marcar esta sesión como completada?')) {
-      if (userId) {
+      if (userId && currentDayData) {
         await finishWorkoutSession(userId, activeDay)
         // Refrescar historial
-        const res = await fetchExerciseHistory(userId, currentDayData.exercises)
+        const res = await fetchExerciseHistory(userId, [
+          ...currentDayData.exercises,
+          ...todayExtras
+        ])
         setHistoryData(res)
       }
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
+
+  const handleAddExtraExerciseToday = (exerciseId: string) => {
+    setExtraExercisesByDay(prev => {
+      const current = prev[activeDay] || []
+      if (current.includes(exerciseId)) return prev
+      return { ...prev, [activeDay]: [...current, exerciseId] }
+    })
+  }
+
+  const handleRemoveExtraExerciseToday = (exerciseId: string) => {
+    setExtraExercisesByDay(prev => ({
+      ...prev,
+      [activeDay]: (prev[activeDay] || []).filter(id => id !== exerciseId)
+    }))
+  }
+
+  if (!currentDayData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-text-muted">
+        Cargando rutina...
+      </div>
+    )
+  }
+
+  const allActiveIds = [
+    ...currentDayData.exercises,
+    ...(currentDayData.alternatives || []),
+    ...todayExtras
+  ]
 
   return (
     <div className="min-h-screen">
@@ -98,10 +154,19 @@ export default function Home() {
             <h1 className="text-2xl font-extrabold">Recomposición Guiada</h1>
           </div>
           <div className="flex gap-2 mt-1">
+            {/* Botón Personalizar Rutina */}
+            <button
+              onClick={() => setEditRoutineOpen(true)}
+              className="bg-bg-elevated p-2.5 rounded-full text-text-muted border border-border-main hover:text-accent transition-colors"
+              title="Personalizar rutina (agregar/quitar ejercicios)"
+            >
+              <Settings2 className="w-5 h-5" />
+            </button>
+
             {/* Botón de Guía para Principiantes */}
             <button
               onClick={() => setGlossaryOpen(true)}
-              className="bg-bg-elevated p-2.5 rounded-full text-text-muted border border-border-main hover:text-accent"
+              className="bg-bg-elevated p-2.5 rounded-full text-text-muted border border-border-main hover:text-accent transition-colors"
               title="Glosario y Guía para principiantes"
             >
               <HelpCircle className="w-5 h-5" />
@@ -126,7 +191,7 @@ export default function Home() {
           </div>
         </div>
         <DayTab 
-          days={workoutDays.map(d => ({ id: d.id, label: d.label }))}
+          days={routineDays.map(d => ({ id: d.id, label: d.label }))}
           activeDay={activeDay}
           todayDayId={todayInfo.dayId}
           onSelectDay={setActiveDay}
@@ -158,12 +223,24 @@ export default function Home() {
                 </p>
               )}
             </div>
-            {userId && (
-              <div className="flex items-center gap-1.5 bg-accent/10 border border-accent/30 px-2 py-1 rounded-full shrink-0">
-                <div className="w-2 h-2 rounded-full bg-accent" />
-                <span className="text-[10px] text-accent font-bold uppercase">Conectado</span>
-              </div>
-            )}
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setEditRoutineOpen(true)}
+                className="bg-bg-card hover:bg-bg-elevated border border-border-main text-text-muted hover:text-accent px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold flex items-center gap-1.5 transition-colors"
+                title="Editar los ejercicios de este día"
+              >
+                <Settings2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Editar Rutina</span>
+              </button>
+
+              {userId && (
+                <div className="flex items-center gap-1.5 bg-accent/10 border border-accent/30 px-2 py-1 rounded-full">
+                  <div className="w-2 h-2 rounded-full bg-accent" />
+                  <span className="text-[10px] text-accent font-bold uppercase">Conectado</span>
+                </div>
+              )}
+            </div>
           </div>
           
           {!userId && (
@@ -175,8 +252,9 @@ export default function Home() {
             </div>
           )}
 
+          {/* Lista de Ejercicios Principales */}
           {currentDayData.exercises.map((exId, index) => {
-            const details = getExerciseDetails(exId)
+            const details = allExercises[exId] || getExerciseDetails(exId)
             const displayDetails = { ...details, title: `${index + 1}. ${details.title}` }
             
             return (
@@ -184,7 +262,7 @@ export default function Home() {
                 key={`${activeDay}-${exId}`}
                 exerciseId={exId}
                 details={displayDetails}
-                onOpenInfo={(id) => setInfoExercise(getExerciseDetails(id))}
+                onOpenInfo={(id) => setInfoExercise(allExercises[id] || getExerciseDetails(id))}
                 userId={userId ?? undefined}
                 dayId={activeDay}
                 history={historyData[exId]}
@@ -192,9 +270,62 @@ export default function Home() {
               />
             )
           })}
+
+          {/* Ejercicios Extras sumados en el día */}
+          {todayExtras.length > 0 && (
+            <div className="mt-5 mb-2">
+              <div className="flex items-center justify-between mb-3 px-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">⭐</span>
+                  <p className="text-xs font-extrabold text-accent uppercase tracking-wider">
+                    Ejercicios Extras Agregados Hoy ({todayExtras.length})
+                  </p>
+                </div>
+                <span className="text-[10px] text-text-muted">Combinados en esta sesión</span>
+              </div>
+
+              {todayExtras.map((extraId, idx) => {
+                const details = allExercises[extraId] || getExerciseDetails(extraId)
+                const displayDetails = { ...details, title: `Extra: ${details.title}` }
+
+                return (
+                  <div key={`extra-${extraId}`} className="relative group">
+                    <ExerciseCard
+                      exerciseId={extraId}
+                      details={displayDetails}
+                      onOpenInfo={(id) => setInfoExercise(allExercises[id] || getExerciseDetails(id))}
+                      userId={userId ?? undefined}
+                      dayId={activeDay}
+                      history={historyData[extraId]}
+                      onOpenGlossary={() => setGlossaryOpen(true)}
+                    />
+                    <button
+                      onClick={() => handleRemoveExtraExerciseToday(extraId)}
+                      className="text-xs text-text-muted hover:text-red px-3 py-1 -mt-2 mb-3 inline-block transition-colors"
+                    >
+                      × Quitar este ejercicio extra de hoy
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Botón para agregar ejercicio extra a la sesión de hoy */}
+          <div className="mt-3 mb-4">
+            <button
+              type="button"
+              onClick={() => setPickerOpen(true)}
+              className="w-full bg-accent/10 border border-dashed border-accent/40 hover:bg-accent/20 text-accent rounded-2xl p-4 flex items-center justify-center gap-2 text-xs font-extrabold transition-colors shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ Agregar ejercicio extra a la sesión de hoy</span>
+            </button>
+          </div>
+
           {/* Sección de Ejercicios Alternativos */}
           {currentDayData.alternatives && currentDayData.alternatives.length > 0 && (
-            <div className="mt-6 mb-4">
+            <div className="mt-4 mb-4">
               <button
                 type="button"
                 onClick={() => setShowAlternatives(prev => !prev)}
@@ -222,7 +353,7 @@ export default function Home() {
                     💡 <strong className="text-text-main">Consejo:</strong> Podés hacer cualquiera de estos si la máquina principal está en uso. ¡Tus series y récords también se guardarán automáticamente!
                   </div>
                   {currentDayData.alternatives.map((altId, altIdx) => {
-                    const details = getExerciseDetails(altId)
+                    const details = allExercises[altId] || getExerciseDetails(altId)
                     const displayDetails = { ...details, title: `Alt ${altIdx + 1}. ${details.title}` }
 
                     return (
@@ -230,7 +361,7 @@ export default function Home() {
                         key={`${activeDay}-alt-${altId}`}
                         exerciseId={altId}
                         details={displayDetails}
-                        onOpenInfo={(id) => setInfoExercise(getExerciseDetails(id))}
+                        onOpenInfo={(id) => setInfoExercise(allExercises[id] || getExerciseDetails(id))}
                         userId={userId ?? undefined}
                         dayId={activeDay}
                         history={historyData[altId]}
@@ -244,7 +375,7 @@ export default function Home() {
           )}
 
           <button 
-            className="block w-full bg-text-main text-bg-dark border-none p-4 rounded-xl text-base font-bold mt-8 mb-5 cursor-pointer flex items-center justify-center gap-2 shadow-lg"
+            className="block w-full bg-text-main text-bg-dark border-none p-4 rounded-xl text-base font-bold mt-8 mb-5 cursor-pointer flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-transform"
             onClick={handleFinish}
           >
             <Check className="w-5 h-5" />
@@ -262,6 +393,21 @@ export default function Home() {
       <FitnessGlossaryModal
         isOpen={glossaryOpen}
         onClose={() => setGlossaryOpen(false)}
+      />
+
+      <EditRoutineModal
+        isOpen={editRoutineOpen}
+        onClose={() => setEditRoutineOpen(false)}
+        initialDayId={activeDay}
+      />
+
+      <ExercisePickerModal
+        isOpen={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelectExercise={handleAddExtraExerciseToday}
+        excludedExerciseIds={allActiveIds}
+        title="Sumar Ejercicio a la Sesión de Hoy"
+        subtitle="Elegí cualquier ejercicio del catálogo para entrenar hoy"
       />
 
       <StickyTimer />
